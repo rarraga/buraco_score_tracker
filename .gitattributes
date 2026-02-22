@@ -1,0 +1,19 @@
+# ── Regla general: Git decide según el OS ─────────────────────────────────────
+* text=auto
+
+# ── Scripts de Windows: siempre CRLF ──────────────────────────────────────────
+*.bat text eol=crlf
+
+# ── Scripts de Linux/macOS: siempre LF ────────────────────────────────────────
+*.sh text eol=lf
+
+# ── Código Python: LF en todos los sistemas ───────────────────────────────────
+*.py text eol=lf
+
+# ── Markdown y texto: LF ──────────────────────────────────────────────────────
+*.md text eol=lf
+
+# ── Archivos binarios: sin conversión ─────────────────────────────────────────
+*.exe binary
+*.png binary
+*.ico binary
