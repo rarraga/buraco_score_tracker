@@ -1,13 +1,12 @@
 # 🃏 Buraco - Contador de Puntajes
 
-Aplicación de escritorio para llevar el marcador del juego de cartas **Buraco**. Desarrollada en Python puro con `tkinter`, sin dependencias externas. Corre en cualquier PC que tenga Python instalado, o directamente como ejecutable `.exe` generado con PyInstaller.
+Aplicación de escritorio para llevar el marcador del juego de cartas **Buraco**. Desarrollada en Python, sin dependencias externas. Es posible ejecutarlo en cualquier PC que tenga Python instalado, o como ejecutable `.exe` generado con PyInstaller.
 
 ---
 
 ## Requisitos
 
 - Python **3.10 o superior**
-- No se requiere ningún paquete adicional (`tkinter` viene incluido con Python)
 
 ## Instalación y uso
 
