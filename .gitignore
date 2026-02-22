@@ -1,0 +1,30 @@
+# ── PyInstaller (build y ejecutables generados) ───────────────────────────────
+build/
+dist/
+*.spec
+
+# ── Partidas guardadas (datos personales del usuario) ─────────────────────────
+*.json
+
+# ── Python cache ───────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# ── Entornos virtuales ─────────────────────────────────────────────────────────
+venv/
+.venv/
+env/
+
+# ── IDEs y editores ────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── Sistema operativo ──────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
