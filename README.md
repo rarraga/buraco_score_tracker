@@ -1,19 +1,20 @@
 # 🃏 Buraco - Contador de Puntajes
 
-Aplicación de escritorio para llevar el marcador del juego de cartas **Buraco**. Desarrollada en Python, sin dependencias externas. Es posible ejecutarlo en cualquier PC que tenga Python instalado, o como ejecutable `.exe` generado con PyInstaller.
+Aplicación de escritorio para llevar el marcador del juego de cartas **Buraco**. Desarrollada en Python puro con `tkinter`, sin dependencias externas. Corre en cualquier PC que tenga Python instalado, o directamente como ejecutable `.exe` generado con PyInstaller.
 
 ---
 
 ## Requisitos
 
 - Python **3.10 o superior**
+- No se requiere ningún paquete adicional (`tkinter` viene incluido con Python)
 
 ## Instalación y uso
 
 ```bash
 # Cloná el repositorio
-git clone https://github.com/rarraga/buraco_score_tracker.git
-cd buraco_score_tracker
+git clone https://github.com/tu-usuario/buraco-score.git
+cd buraco-score
 
 # Ejecutá la aplicación
 python main.py
@@ -38,6 +39,7 @@ chmod +x build.sh
 El ejecutable queda en la carpeta `dist/`. Es completamente standalone y puede copiarse a cualquier máquina sin instalar nada.
 
 > ⚠️ El ejecutable se genera para el sistema operativo donde se compila. Para generar para Windows, corré `build.bat` desde Windows.
+> Cada vez que se actualice el código es necesario volver a correr el script de build para obtener el ejecutable actualizado.
 
 ---
 
@@ -62,26 +64,33 @@ buraco-score/
 ## Cómo usar la aplicación
 
 ### 1. Nueva partida
-Hacé click en **🆕 Nueva Partida** (o `Ctrl+N`) e ingresá los nombres de los dos equipos.
+Hacé click en **🆕 Nueva Partida** (o `Ctrl+N`). Se abre un diálogo donde elegís la cantidad de jugadores y los nombres:
+
+- **2 jugadores** → partida individual entre dos personas
+- **3 jugadores** → partida individual entre tres personas, cada uno con su propio marcador
+- **4 jugadores** → dos equipos de dos personas, ingresás el nombre de cada equipo
+
+> Si hay una partida en curso al iniciar una nueva, la app te preguntará si querés guardarla antes de continuar.
 
 ### 2. Registrar una mano
-Al terminar cada mano del juego, hacé click en **➕ Nueva Mano**. Se abre un formulario con dos pestañas (una por equipo) donde ingresás:
+Al terminar cada mano, hacé click en **➕ Nueva Mano**. Se abre un formulario con una pestaña por equipo/jugador donde ingresás:
 
 - **Fichas bajadas** → puntos a favor (podés tipear el total o usar 🧮 para contar ficha por ficha)
 - **Fichas en mano del compañero** → las que quedaron sin bajar (se restan automáticamente)
-- **Cierre**, **canastas puras**, **canastas impuras**
-- **El Muerto** → si hubo muerto disponible y quién lo compró
+- **Cierre**, **Compró el Muerto**, **canastas puras**, **canastas impuras**
 
-El subtotal estimado se actualiza en tiempo real mientras completás los datos.
+El subtotal estimado se actualiza en tiempo real mientras completás los datos. Si no ingresaste ningún dato, el subtotal muestra `—` para evitar confusiones.
 
 ### 3. Confirmar
-Hacé click en **✔ Confirmar mano** y el marcador se actualiza. La aplicación detecta automáticamente cuando un equipo llega a 3000 puntos.
+Hacé click en **✔ Confirmar mano** y el marcador se actualiza. La aplicación detecta automáticamente cuando un equipo/jugador llega a 3000 puntos.
+
+> Si varios jugadores superan 3000 en la misma mano, gana el de mayor puntaje. El mensaje final muestra los puntajes de todos los que llegaron para que la decisión sea transparente.
 
 ### 4. Deshacer
 Si cometiste un error en la última mano, usá **↩ Deshacer última mano** para revertirla — incluso si esa mano había terminado la partida.
 
 ### 5. Guardar y cargar
-Desde el menú **Partida** podés guardar la partida en un archivo `.json` y retomarla más tarde.
+Desde el menú **Partida** podés guardar la partida en un archivo `.json` y retomarla más tarde con **Abrir partida**.
 
 ---
 
@@ -121,19 +130,23 @@ Puntaje = fichas_bajadas
 ### Fin de partida
 
 - El objetivo es llegar a **3000 puntos**.
-- Para poder **cerrar**, el equipo debe tener al menos una canasta (pura o impura) y haber comprado el muerto.
-- Si ambos equipos superan 3000 en la misma mano, gana el de mayor puntaje.
+- Para poder **cerrar**, el equipo/jugador debe tener al menos una canasta (pura o impura) y haber comprado el muerto.
+- Si varios jugadores superan 3000 en la misma mano, gana el de **mayor puntaje**.
 
 ---
 
 ## Funcionalidades
 
+- ✅ Soporte para 2, 3 o 4 jugadores con marcador dinámico
 - ✅ Marcador en tiempo real con barra de progreso verde
 - ✅ Interfaz a pantalla completa con ajuste dinámico a cualquier resolución
-- ✅ Ingreso guiado de puntajes por mano
+- ✅ Aviso al iniciar nueva partida si hay una partida en curso (con opción de guardar)
+- ✅ Ingreso guiado de puntajes por mano con pestaña por equipo/jugador
 - ✅ Calculadora de fichas integrada (ficha por ficha con subtotales)
 - ✅ Preview del subtotal estimado antes de confirmar cada mano
 - ✅ Historial completo con puntajes por mano y acumulados
 - ✅ Deshacer última mano (incluso si era la mano ganadora)
 - ✅ Guardar y cargar partidas en `.json`
-- ✅ Detección automática del ganador
+- ✅ Detección automática del ganador con manejo correcto de empates en 3000+
+
+---

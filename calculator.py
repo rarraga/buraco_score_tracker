@@ -23,7 +23,7 @@ class CardCalculatorDialog(tk.Toplevel):
 
     def _build_ui(self):
         CARD_LABELS = {
-            1: "As  (1) → 15 pts",
+            1: "1 → 15 pts",
             2: "2   → 20 pts",
             3: "3   → 5 pts",
             4: "4   → 5 pts",
@@ -33,9 +33,9 @@ class CardCalculatorDialog(tk.Toplevel):
             8: "8   → 10 pts",
             9: "9   → 10 pts",
             10: "10  → 10 pts",
-            11: "J   → 10 pts",
-            12: "Q   → 10 pts",
-            13: "K   → 10 pts",
+            11: "11   → 10 pts",
+            12: "12   → 10 pts",
+            13: "13   → 10 pts",
             "comodin": "Comodín → 50 pts",
         }
 

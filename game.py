@@ -5,14 +5,13 @@ game.py - Lógica del juego Buraco
 from dataclasses import dataclass, field
 from typing import List, Optional
 import json
-import os
 
 # ── Valores de las fichas ──────────────────────────────────────────────────────
 CARD_VALUES = {
     1: 15,
     2: 20,
     **{n: 5 for n in range(3, 8)},   # 3 al 7
-    **{n: 10 for n in range(8, 14)}, # 8 al 13
+    **{n: 10 for n in range(8, 14)}, # 8 al 13 (J=11, Q=12, K=13)
     "comodin": 50,
 }
 
@@ -29,29 +28,25 @@ TARGET_SCORE = 3000
 
 @dataclass
 class RoundScore:
-    """Puntuación de una mano para un equipo."""
+    """Puntuación de una mano para un equipo/jugador."""
     team_name: str
-    cards_down: int = 0          # Puntos por fichas bajadas
-    cards_remaining: int = 0     # Puntos por fichas NO bajadas (se restan)
+    cards_down: int = 0
+    cards_remaining: int = 0
     cierre: bool = False
     canastas_puras: int = 0
     canastas_impuras: int = 0
     muerto_bought: bool = False
-    muerto_available: bool = True  # Si el muerto fue ofrecido en esta mano
+    muerto_available: bool = True
 
     @property
     def total(self) -> int:
-        pts = self.cards_down
-        pts -= self.cards_remaining
+        pts = self.cards_down - self.cards_remaining
         if self.cierre:
             pts += BONUS["cierre"]
-        pts += self.canastas_puras * BONUS["canasta_pura"]
+        pts += self.canastas_puras   * BONUS["canasta_pura"]
         pts += self.canastas_impuras * BONUS["canasta_impura"]
         if self.muerto_available:
-            if self.muerto_bought:
-                pts += BONUS["muerto"]
-            else:
-                pts -= BONUS["muerto"]  # Penalización por no comprar
+            pts += BONUS["muerto"] if self.muerto_bought else -BONUS["muerto"]
         return pts
 
     def breakdown(self) -> str:
@@ -96,33 +91,55 @@ class Round:
 
 
 class Game:
-    def __init__(self, team1_name: str = "Equipo 1", team2_name: str = "Equipo 2"):
-        self.teams = [Team(team1_name), Team(team2_name)]
+    def __init__(self, team_names: list[str]):
+        """
+        team_names: lista de 2 o 3 nombres (equipos o jugadores individuales).
+        - 2 nombres → partida de 2 equipos/jugadores
+        - 3 nombres → partida de 3 jugadores individuales
+        Para 4 jugadores se usan 2 nombres de equipo (equipos de 2).
+        """
+        if len(team_names) < 2 or len(team_names) > 3:
+            raise ValueError("Se requieren 2 o 3 participantes.")
+        self.teams: List[Team] = [Team(n) for n in team_names]
         self.rounds: List[Round] = []
         self.current_round = 1
         self.winner: Optional[Team] = None
+        # Indica si la victoria fue por empate en 3000+ (para el mensaje de UI)
+        self.was_tied_win: bool = False
+
+    @property
+    def num_teams(self) -> int:
+        return len(self.teams)
 
     @property
     def is_over(self) -> bool:
         return self.winner is not None
 
-    def add_round(self, score1: RoundScore, score2: RoundScore):
-        """Registra los puntajes de una mano."""
-        r = Round(self.current_round, [score1, score2])
+    def add_round(self, scores: list[RoundScore]):
+        """Registra los puntajes de una mano. scores debe tener un elemento por equipo."""
+        if len(scores) != self.num_teams:
+            raise ValueError(f"Se esperaban {self.num_teams} puntajes, se recibieron {len(scores)}.")
+        r = Round(self.current_round, list(scores))
         self.rounds.append(r)
-        self.teams[0].scores.append(score1.total)
-        self.teams[1].scores.append(score2.total)
+        for team, score in zip(self.teams, scores):
+            team.scores.append(score.total)
         self.current_round += 1
         self._check_winner()
 
     def _check_winner(self):
         winners = [t for t in self.teams if t.has_won]
-        if winners:
-            # Si ambos superan 3000, gana el de mayor puntaje
+        if not winners:
+            return
+        # Si solo uno superó 3000, ese gana directamente
+        if len(winners) == 1:
+            self.winner = winners[0]
+            self.was_tied_win = False
+        else:
+            # Varios superaron 3000 en la misma mano → gana el de mayor puntaje
             self.winner = max(winners, key=lambda t: t.total)
+            self.was_tied_win = True
 
     def undo_last_round(self):
-        """Deshace la última mano registrada."""
         if not self.rounds:
             return
         self.rounds.pop()
@@ -131,20 +148,8 @@ class Game:
                 team.scores.pop()
         self.current_round -= 1
         self.winner = None
-        # Re-check winner after undo
+        self.was_tied_win = False
         self._check_winner()
-
-    def score_summary(self) -> str:
-        lines = [f"{'─'*40}"]
-        lines.append(f"{'PARTIDA BURACO':^40}")
-        lines.append(f"{'─'*40}")
-        for t in self.teams:
-            lines.append(f"  {t.name:<20} {t.total:>6} pts")
-        lines.append(f"{'─'*40}")
-        lines.append(f"  Objetivo: {TARGET_SCORE} puntos")
-        if self.winner:
-            lines.append(f"\n🏆 ¡GANADOR: {self.winner.name}!")
-        return "\n".join(lines)
 
     def to_dict(self) -> dict:
         return {
@@ -162,9 +167,9 @@ class Game:
         with open(filepath, "r", encoding="utf-8") as f:
             data = json.load(f)
         teams = data["teams"]
-        g = cls(teams[0]["name"], teams[1]["name"])
-        g.teams[0].scores = teams[0]["scores"]
-        g.teams[1].scores = teams[1]["scores"]
+        g = cls([t["name"] for t in teams])
+        for team_obj, team_data in zip(g.teams, teams):
+            team_obj.scores = team_data["scores"]
         g.current_round = data["current_round"]
         g._check_winner()
         return g
@@ -172,10 +177,6 @@ class Game:
 
 # ── Calculadora de fichas ──────────────────────────────────────────────────────
 def calculate_cards(cards: dict) -> int:
-    """
-    cards: {numero_o_'comodin': cantidad}
-    Ej: {1: 2, 7: 3, 'comodin': 1}
-    """
     total = 0
     for card, qty in cards.items():
         if card in CARD_VALUES:
